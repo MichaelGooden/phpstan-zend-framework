@@ -44,11 +44,28 @@ class PluginClassReflectionExtension implements
      */
     public function initFramework()
     {
-        // Cribbed right out of the Application class for ZF3
-        $appConfig = require __DIR__ . '/../../../../../../config/application.config.php';
-        if (file_exists(__DIR__ . '/../../../../../../config/development.config.php')) {
-            $appConfig = ArrayUtils::merge($appConfig, require __DIR__ . '/../../../../../../config/development.config.php');
+        // presumes ZF2 config style
+        if (file_exists(__DIR__ . '/../../../../../../configs')) {
+            // Cribbed right out of the Application class for ZF2
+            $appConfig = require __DIR__ . '/../../../../../../configs/application.global.php';
+            if (file_exists(__DIR__ . '/../../../../../../configs/application.local.php')) {
+                $appConfig = ArrayUtils::merge($appConfig, require __DIR__ . '/../../../../../../configs/application.local.php');
+            }
         }
+
+        // presumes ZF3 config style
+        if (file_exists(__DIR__ . '/../../../../../../config')) {
+            // Cribbed right out of the Application class for ZF3
+            $appConfig = require __DIR__ . '/../../../../../../config/application.config.php';
+            if (file_exists(__DIR__ . '/../../../../../../config/development.config.php')) {
+                $appConfig = ArrayUtils::merge($appConfig, require __DIR__ . '/../../../../../../config/development.config.php');
+            }
+        }
+
+        if (!isset($appConfig)) {
+            throw new \RuntimeException('Config files not found.');
+        }
+
         $smConfig = isset($appConfig['service_manager']) ? $appConfig['service_manager'] : [];
         $smConfig = new Service\ServiceManagerConfig($smConfig);
 
